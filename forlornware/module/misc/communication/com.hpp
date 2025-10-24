@@ -1,4 +1,6 @@
 #pragma once
+
+#include <optional>
 #include <string>
 
 class script_server
@@ -9,7 +11,8 @@ public:
 
     bool initialize(int port);
     void close();
-    std::string receive_script();
+    [[nodiscard]] std::optional<std::string> receive_script();
+    [[nodiscard]] std::string last_error() const;
 
 private:
     struct impl;

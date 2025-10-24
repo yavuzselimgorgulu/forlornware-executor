@@ -1,21 +1,176 @@
-﻿<Window x:Class="forlornui.MainWindow"
+<Window x:Class="forlornui.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:forlornui"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Button Content="Execute" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Height="36" Width="139" FontSize="15" Click="Button_Click_2"/>
-        <Button Content="Inject" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Height="36" Width="139" FontSize="15" Click="Button_Click"/>
-        <Button Content="Clear" HorizontalAlignment="Left" Margin="154,0,0,10" VerticalAlignment="Bottom" Height="36" Width="139" FontSize="15" Click="Button_Click_1"/>
-        <RichTextBox x:Name="editor" Margin="10,10,10,51" FontSize="15" VerticalScrollBarVisibility="Visible" TextChanged="Editor_TextChanged" AcceptsTab="True">
-            <FlowDocument>
-                <Paragraph LineHeight="2">
-                    <Run Text="printidentity()"/>
-                </Paragraph>
-            </FlowDocument>
-        </RichTextBox>
+        Title="ForlornWare Executor"
+        Height="540"
+        Width="920"
+        MinHeight="520"
+        MinWidth="880"
+        Background="#070B12">
+    <Window.Resources>
+        <SolidColorBrush x:Key="WindowChromeBrush" Color="#070B12"/>
+        <LinearGradientBrush x:Key="ShellBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#111B2A" Offset="0"/>
+            <GradientStop Color="#0A1019" Offset="1"/>
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#0D1625"/>
+        <SolidColorBrush x:Key="EditorBackgroundBrush" Color="#0A1320"/>
+        <SolidColorBrush x:Key="EditorBorderBrush" Color="#1B2740"/>
+        <SolidColorBrush x:Key="HeadingBrush" Color="#EEF3FF"/>
+        <SolidColorBrush x:Key="SubheadingBrush" Color="#8C9BB8"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#7A6BFF"/>
+        <SolidColorBrush x:Key="AccentBrushHover" Color="#8D7FFF"/>
+        <SolidColorBrush x:Key="AccentBrushPressed" Color="#5B4ED7"/>
+        <SolidColorBrush x:Key="SecondaryBrush" Color="#1F2A44"/>
+        <SolidColorBrush x:Key="SecondaryBrushHover" Color="#263357"/>
+        <SolidColorBrush x:Key="SecondaryBrushPressed" Color="#18223A"/>
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="18,12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="12"
+                                SnapsToDevicePixels="True">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="16"
+                                                  ShadowDepth="2"
+                                                  Opacity="0.25"
+                                                  Color="#FF06090F"/>
+                            </Border.Effect>
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="ScaleTransform" ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource AccentBrushHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource AccentBrushPressed}"/>
+                                <Setter TargetName="ScaleTransform" Property="ScaleTransform.ScaleX" Value="0.96"/>
+                                <Setter TargetName="ScaleTransform" Property="ScaleTransform.ScaleY" Value="0.96"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource SecondaryBrushHover}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{StaticResource SecondaryBrushPressed}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="RichTextBox">
+            <Setter Property="Background" Value="{StaticResource EditorBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="#F6F8FF"/>
+            <Setter Property="BorderBrush" Value="{StaticResource EditorBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Padding" Value="20,16"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource WindowChromeBrush}">
+        <Border Background="{StaticResource ShellBackgroundBrush}" CornerRadius="24" Padding="32">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="28" ShadowDepth="0" Opacity="0.35" Color="#80030918"/>
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Vertical" Margin="0,0,0,24">
+                    <TextBlock Text="ForlornWare"
+                               FontSize="32"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource HeadingBrush}"/>
+                    <TextBlock Text="A clean, modern executor interface for your scripts."
+                               Margin="0,8,0,0"
+                               FontSize="15"
+                               Foreground="{StaticResource SubheadingBrush}"/>
+                </StackPanel>
+
+                <Border Grid.Row="1"
+                        Background="{StaticResource CardBackgroundBrush}"
+                        CornerRadius="18"
+                        Padding="1">
+                    <Border BorderThickness="1"
+                            BorderBrush="{StaticResource EditorBorderBrush}"
+                            CornerRadius="18"
+                            Padding="0">
+                        <RichTextBox x:Name="editor"
+                                     AcceptsTab="True"
+                                     TextChanged="Editor_TextChanged">
+                            <FlowDocument>
+                                <Paragraph LineHeight="24">
+                                    <Run Text="printidentity()"/>
+                                </Paragraph>
+                            </FlowDocument>
+                        </RichTextBox>
+                    </Border>
+                </Border>
+
+                <Grid Grid.Row="2" Margin="0,28,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Vertical" Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Ready to execute"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource HeadingBrush}"/>
+                        <TextBlock Text="Make sure your injector is running before executing scripts."
+                                   FontSize="13"
+                                   Foreground="{StaticResource SubheadingBrush}"/>
+                    </StackPanel>
+
+                    <Button Content="Clear"
+                            Grid.Column="1"
+                            Margin="24,0,0,0"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Click="Button_Click_1"/>
+                    <Button Content="Inject"
+                            Grid.Column="2"
+                            Margin="16,0,0,0"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Click="Button_Click"/>
+                    <Button Content="Execute"
+                            Grid.Column="3"
+                            Margin="16,0,0,0"
+                            Click="Button_Click_2"/>
+                </Grid>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
